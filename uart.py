@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#%%
+
 from serial_protocol import SerialProtocol
 from errors import *
 import serial
@@ -13,6 +13,9 @@ class Uart(SerialProtocol):
         self.timeout = 0.1
         self.link = None
         self._command = b'check'
+        self._toggle_on = b'on'
+        self._toggle_off = b'off'
+        
 
     @property
     def baudrate(self):
@@ -75,5 +78,27 @@ class Uart(SerialProtocol):
                     print(f'attempts needed: {attempts}')
                     data_length = arduino.inWaiting()
                     brightness = arduino.read(data_length).decode().strip()
+                    print(brightness)
                     return brightness
-# %%
+    
+    def led_on(self):
+        with self.link as arduino:
+            if arduino.isOpen():
+                time.sleep(1)
+                print("Connected to arduino")
+                arduino.flush()
+                arduino.write(self._toggle_on)
+                arduino.flush()
+                time.sleep(1)
+                print('sent on')
+                
+    def led_off(self):
+        with self.link as arduino:
+            if arduino.isOpen():
+                time.sleep(1)
+                print("Connected to arduino")
+                arduino.flush()
+                arduino.write(self._toggle_off)
+                arduino.flush()
+                time.sleep(1)
+                print('sent off')
