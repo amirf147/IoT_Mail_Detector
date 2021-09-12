@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #%%
-from errors import *
+import errors as err
 from sense_hat import SenseHat
 
 class Sensor:
@@ -15,13 +15,15 @@ class Sensor:
 
     @board.setter
     def board(self, value):
+        if not isinstance(value, str):
+            raise err.NotString('value must be a string')
         value = value.lower()
         if value == 'raspberry' or value == 'arduino':
             self._board = value
         elif value == 'sensehat':
             self._board = value
         else:
-            raise ImproperChoice("board must be 'raspberry' or 'arduino'" +
+            raise err.ImproperChoice("board must be 'raspberry' or 'arduino'" +
                                  "or 'sensehat'")
 
     @board.deleter
@@ -44,7 +46,7 @@ class Sensor:
             self.measurement = SenseHat().get_accelerometer_raw()
             return self.measurement
         else:
-            raise ImproperChoice('when getting sensehat measurement, sensor' +
+            raise err.ImproperChoice('when getting sensehat measurement, sensor' +
                                  'must be named either "temperature",' +
                                  '"pressure" or "humidity"')
 

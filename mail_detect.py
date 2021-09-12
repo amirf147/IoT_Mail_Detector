@@ -16,9 +16,7 @@ import serial as ser
 # logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 #                      level=logging.INFO)
 
-received = 1 # used as signal to indicate received mail
-
-def mail_slot_check(accel):
+def mail_slot_check(accel: dict) -> bool:
     if accel['z'] > 0.57:
         return True
     else:
@@ -82,14 +80,15 @@ def mail_slot_check(accel):
 #     updater.idle()
 
 
-def measurement_loop():
+def measurement_loop() -> None:
     
+    received = 1 # used as datapoint to indicate received mail in the database
+
     bot = telegram.Bot(API_KEY)
     
     print('loop started')
 
-    start_time = datetime.now()
-    mail_time = datetime.now()
+    start_time, mail_time = datetime.now()
 
     while True:
 
@@ -99,21 +98,25 @@ def measurement_loop():
         mail_slot_opened = mail_slot_check(accelerometer.measure())
         print(mail_slot_opened)
         
-        
         diff = time_now - start_time #how much time elapsed since last poll
         mail_diff = time_now - mail_time #time between mail reception
 
         if diff.seconds >= 5:
-            global sensors
-            sensors = poll_sensors() # get sensor measurements
-            print(sensors)
+
+            #sensor measurements has to be global because it is being
+            #used in the the telegram thread and the sensor updated
+            #values need to be accessible from there for any queries
+            global sensor_measurements
+            sensor_measurements = poll_sensors() # get sensor measurements
+            print(sensor_measurements)
             
-            if int(sensors['brightness']) > 10:
+            #check for door open condition
+            if int(sensor_measurements['brightness']) > 10:
                 url = f'https://api.telegram.org/bot{API_KEY}/sendMessage?chat_id=1734914451&text=door open!'
                 requests.get(url)
 
             # Send the sensor data to the database
-            for sensor, measurement in sensors.items():
+            for sensor, measurement in sensor_measurements.items():
                 print(f'sensor: {sensor} measurement: {measurement}')
                 influx.send_measurement(sensor, measurement)
 
@@ -154,8 +157,7 @@ def measurement_loop():
                 counter2 += 1
                         
 
-# main loop
-
-t2 = threading.Thread(target = measurement_loop)
-#t1.start()
-t2.start()
+if __name__ == 'main':
+    t2 = threading.Thread(target = measurement_loop)
+    #t1.start()
+    t2.start()

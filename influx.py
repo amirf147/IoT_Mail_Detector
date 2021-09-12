@@ -25,4 +25,5 @@ class Influx(Database):
             print('Make sure <Influx object>.db_name exists as database')
             raise
 
+
 # %%
