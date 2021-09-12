@@ -36,7 +36,7 @@ TO DO:
 
         fix some of the class hierarchies to make more logical sense
 
-        change file names to fit with software design designs
+        change file names to fit with standards and guidelines
 
     Add logging:
         using the logging library
