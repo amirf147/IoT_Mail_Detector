@@ -8,8 +8,8 @@ The arduino controls power to a 12V LED to help in the image capturing and
 also monitors hallway brightness with a photoresistor to detect if front
 door has been opened. The frontend of the application is in the form of a
 telegram bot where the user can make queries on conditions in the home, get
-nofications for when the front door is opened and if mail has been received
-An image of the mail is also sent to the user. All data is stored in a local
+nofications for when the front door is opened and if mail has been received,
+an image of the mail is also sent to the user. All data is stored in a local
 InfluxDB database and data analysis and presentation is provided with
 Grafana.
 
