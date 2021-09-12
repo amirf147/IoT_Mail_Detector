@@ -1,7 +1,7 @@
 # IoT_Mail_Detector
 
 A mail detector device that uses an arduino and raspberry pi communicating
-with eachother serially. The raspberry pi uses the senseHat for detecting
+with each other serially. The raspberry pi uses the senseHat for detecting
 movement of the mail slot as well as providing indoor climate conditions.
 The raspberry pi uses a camera to provide images of the mail received.
 The arduino controls power to a 12V LED to help in the image capturing and
