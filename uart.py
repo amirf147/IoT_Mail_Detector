@@ -14,8 +14,7 @@ class Uart(SerialProtocol):
         self.link = None
         self._command = b'check'
         self._toggle_on = b'on'
-        self._toggle_off = b'off'
-        
+        self._toggle_off = b'off'     
 
     @property
     def baudrate(self):
@@ -45,6 +44,8 @@ class Uart(SerialProtocol):
 
     @port.setter
     def port(self, value):
+        if not isinstance(value, str):
+            raise NotString('value should be string')
         if value == "/dev/ttyACM0" or value == "/dev/ttyACM1":
             self._port = value
         else:

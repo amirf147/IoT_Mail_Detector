@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 """database.py: Database class for creating database objects"""
-
+#%%
 from sys import exit
-from errors import *
+import errors as err
+import warnings
 
 if __name__ == "__main__":
     print("I prefer to be a module.")
@@ -12,7 +13,7 @@ if __name__ == "__main__":
 class Database:
 
     def __init__(self):
-        self._type = None
+        self._db_type = None
         self._host = None
         self._port = None
     
@@ -23,23 +24,25 @@ class Database:
     #-----------------------------------------------#
     # TYPE getter/setter/deleter                    #
     #-----------------------------------------------#
+
     @property
-    def type(self):
-        return self._type
+    def db_type(self):
+        return self._db_type
     
-    @type.setter
-    def type(self, entered):
-        entered = entered.lower()
+    @db_type.setter
+    def db_type(self, entered):
+        if not isinstance(entered, str):
+            raise err.NotString('db_type must string')
         types = ['local', 'remote', 'cloud']
-        if entered not in types:
-            raise ImproperChoice("type must be either local, remote or cloud")
+        if entered.lower() not in types:
+            raise err.ImproperChoice("db_type must be either local, remote or cloud")
         else:
-            self._type = entered
+            self._db_type = entered
     
-    @type.deleter
-    def type(self):
-        old_type = self._type
-        self._type = None
+    @db_type.deleter
+    def db_type(self):
+        old_type = self._db_type
+        self._db_type = None
         print(f'old value of host: {old_type} DELETED')
 
     #-----------------------------------------------#
@@ -48,20 +51,25 @@ class Database:
     @property
     def host(self):
         return self._host
-        
+
+    def octet_check_failed(self, split_ip):
+        for octet in split_ip:
+            if not (int(octet) > 0 and int(octet) <= 255):
+                return True
+        return False
+                
     @host.setter
     def host(self, ip):
+        if not isinstance(ip, str):
+            raise err.NotString('db_type must be string')
         split_ip = ip.split(".")
-        if ip == 'localhost':
+        if ip.lower() == 'localhost':
             self._host = ip
         elif len(split_ip) < 4 or len(split_ip) > 4:
-            raise FormatError("Not in form 'x.x.x.x'")
-        else:
-            for octet in split_ip:
-                if int(octet) > 0 and int(octet) <= 255:
-                    pass
-                else:
-                    raise RangeError("1 or more octets out of range")
+            print(len(split_ip))
+            raise err.FormatError("Not in form 'x.x.x.x' or 'localhost'")
+        elif self.octet_check_failed(split_ip):
+            raise err.RangeError("1 or more octets out of range")
         self._host = ip
 
     @host.deleter
@@ -79,26 +87,23 @@ class Database:
     
     @port.setter
     def port(self, entered):
-        warning = RangeWarning('port is in registered range: ' +
-                               'make sure its not being used')
         if not isinstance(entered, int):
-            raise NotInteger("port must be an integer")
+            raise err.NotInteger("port must be an integer")
         elif entered >= 0 and entered < 1024:
-            raise RangeError("Port is in the well-known range, port not set")
+            raise err.RangeError("Port is in the well-known range, port not set")
         elif entered >= 1024 and entered < 49152:
-            try:
-                raise warning
-            except:
-                print(warning.__class__.__name__, warning)
-            finally:
-                self._port = entered
+            warnings.warn('port is in registered range.' + 
+                          'Make sure its not being used')
+            self._port = entered
         elif entered >= 49152 and entered < 65536:
             self._port = entered
         else:
-            raise RangeError('port is out of range, port not set')     
+            raise err.RangeError('port is out of range, port not set')     
             
     @port.deleter
-    def port(self):
+    def port(self): 
         old_port = self._port
         self._port = None
         print(f'old value of host: {old_port} DELETED')
+
+# %%
