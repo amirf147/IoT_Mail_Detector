@@ -1,3 +1,4 @@
+from errors import NotString
 from constants import API_KEY
 from telegram.ext import *
 #import logging
@@ -15,8 +16,11 @@ class TelegramBot:
     dispatcher = updater.dispatcher
 
     def responses(self, query):
+
+        if not isinstance(query, str):
+            raise NotString("query must be string")
         query = query.lower()
-    
+        
         if query in ('temp', 'temperature', 't'):
             reading = self.sensors['temperature']
             resp = f'{reading} degrees Celsius'
