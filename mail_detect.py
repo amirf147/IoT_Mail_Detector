@@ -16,14 +16,11 @@ import actions
 # logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 #                      level=logging.INFO)
 
-received = 1 # used as signal to indicate received mail
-
-
-# def mail_slot_check(accel):
-#     if accel['y'] > .3:
-#         return True
-#     else:
-#         return False
+def mail_slot_check(accel: dict) -> bool:
+    if accel['z'] > 0.57:
+        return True
+    else:
+        return False
 
 # def poll_sensors():
 #      return {'brightness'    : serial.get_measurement(),
@@ -83,14 +80,15 @@ received = 1 # used as signal to indicate received mail
 #     updater.idle()
 
 
-def measurement_loop():
+def measurement_loop() -> None:
     
+    received = 1 # used as datapoint to indicate received mail in the database
+
     bot = telegram.Bot(API_KEY)
     
     print('loop started')
 
-    start_time = datetime.now()
-    mail_time = datetime.now()
+    start_time, mail_time = datetime.now()
 
     while True:
 
@@ -111,8 +109,20 @@ def measurement_loop():
 
         if diff.seconds >= 5:
 
+            #sensor measurements has to be global because it is being
+            #used in the the telegram thread and the sensor updated
+            #values need to be accessible from there for any queries
+            global sensor_measurements
+            sensor_measurements = poll_sensors() # get sensor measurements
+            print(sensor_measurements)
+            
+            #check for door open condition
+            if int(sensor_measurements['brightness']) > 10:
+                url = f'https://api.telegram.org/bot{API_KEY}/sendMessage?chat_id=1734914451&text=door open!'
+                requests.get(url)
+
             # Send the sensor data to the database
-            for sensor, measurement in sensors.items():
+            for sensor, measurement in sensor_measurements.items():
                 print(f'sensor: {sensor} measurement: {measurement}')
                 influx.send_measurement(sensor, measurement)
 
