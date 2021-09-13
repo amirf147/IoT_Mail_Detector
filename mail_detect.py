@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setup import sensors, messages, accelerometer, poll_sensors, influx, picamera, API_KEY
+from setup import sensors, messages, accelerometer, poll_sensors, influx, picamera, API_KEY, CHAT_ID
 from datetime import datetime
 import time
 import telegram
@@ -12,15 +12,8 @@ import actions
 
 #import logging
 
-
 # logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 #                      level=logging.INFO)
-
-def mail_slot_check(accel: dict) -> bool:
-    if accel['z'] > 0.57:
-        return True
-    else:
-        return False
 
 # def poll_sensors():
 #      return {'brightness'    : serial.get_measurement(),
@@ -118,8 +111,7 @@ def measurement_loop() -> None:
             
             #check for door open condition
             if int(sensor_measurements['brightness']) > 10:
-                url = f'https://api.telegram.org/bot{API_KEY}/sendMessage?chat_id=1734914451&text=door open!'
-                requests.get(url)
+                requests.get(messages['door_open'])
 
             # Send the sensor data to the database
             for sensor, measurement in sensor_measurements.items():

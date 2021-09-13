@@ -30,13 +30,19 @@ humidity = Sensor('humidity', 'sensehat')
 accelerometer = Sensor('accelerometer', 'sensehat')
 
 def poll_sensors():
-     return {'brightness'  : serial.get_measurement(),
-             'temperature' : round(float(temperature.measure()), 2),
-             'pressure'    : round(float(pressure.measure()), 2),
-             'humidity'    : round(float(humidity.measure()), 2),
-             }
+    print('polling sensors')
+    return {'brightness'    : serial.get_measurement(),
+            'temperature'   : round(float(temperature.measure()), 2),
+            'pressure'      : round(float(pressure.measure()), 2),
+            'humidity'      : round(float(humidity.measure()), 2),
+            }
 
-sensor_measurements = poll_sensors() # will be made global variable
+sensor_measurements = poll_sensors() #init global variable with values
+
+# telegram messages that will be sent through HTTPS 
+messages = {'door_open'   : f'https://api.telegram.org/bot{API_KEY}/sendMessage?chat_id={CHAT_ID}&text=Door Open!',
+            'mail_rx'     : f'https://api.telegram.org/bot{API_KEY}/sendMessage?chat_id={CHAT_ID}&text=Mail Received!',
+            }
 
 # Telegram bot setup into thread
 def bot_listener():
