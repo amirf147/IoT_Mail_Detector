@@ -2,6 +2,7 @@ from influx import *
 from uart import Uart
 from sensor import *
 from telegram_bot import *
+from constants import API_KEY, CHAT_ID
 import picamera
 import threading
 

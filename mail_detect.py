@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-from setup import *
+from setup import sensors, messages, accelerometer, poll_sensors, influx, picamera, API_KEY
 from datetime import datetime
 import time
-from constants import API_KEY
 import telegram
 #from telegram.ext import *
-#import threading
+import threading
 import requests
 import serial as ser
+import actions
 
 #import logging
 
@@ -95,11 +95,17 @@ def measurement_loop() -> None:
         time_now = datetime.now()
 
         #continuosly update accelerometer readings
-        mail_slot_opened = mail_slot_check(accelerometer.measure())
+        mail_slot_opened = actions.mail_slot_check(accelerometer.measure())
         print(mail_slot_opened)
         
         diff = time_now - start_time #how much time elapsed since last poll
         mail_diff = time_now - mail_time #time between mail reception
+
+        global sensors
+        sensors = poll_sensors() # get sensor measurements
+        print(sensors)
+        if int(sensors['brightness']) > 40:
+            requests.get(messages['door_open'])
 
         if diff.seconds >= 5:
 
@@ -124,8 +130,7 @@ def measurement_loop() -> None:
 
         if mail_slot_opened and mail_diff.seconds > 3:
             
-            url = f'https://api.telegram.org/bot{API_KEY}/sendMessage?chat_id=1734914451&text=Mail Received!'
-            requests.get(url)
+            requests.get(messages['mail_rx'])
             a = ser.Serial("/dev/ttyACM0", 500000, timeout=0.1)
             counter = 0
             while a.isOpen() and counter < 5:
