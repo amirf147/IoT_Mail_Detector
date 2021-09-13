@@ -3,7 +3,6 @@ from uart import Uart
 from sensor import *
 from telegram_bot import *
 from constants import API_KEY, CHAT_ID
-import picamera
 import threading
 
 # Database client set up
@@ -46,7 +45,7 @@ messages = {'door_open'   : f'https://api.telegram.org/bot{API_KEY}/sendMessage?
 
 # Telegram bot setup into thread
 def bot_listener():
-    
+
     #sensor_measurements variable is made global here so any updates
     #that occur to it will be passed along to the telegram bot
     global sensor_measurements
